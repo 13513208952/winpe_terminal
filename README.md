@@ -1,7 +1,7 @@
-# winpe_terminal
+# WinPE_Terminal
 
 在 Linux 下用 QEMU/KVM 运行 Windows PE，并把 Windows 命令行透传到当前终端，
-用于双系统用户在不重启的情况下对**自己的** Windows 分区执行原生维护工具（如 `chkdsk`）。
+用于ubuntu和windows双系统用户在linux环境下对 Windows 分区进行管理和恢复操作（如使用 `chkdsk`修复ntfs分区）。
 
 **用户文档入口：[document/for_user/readme.txt](document/for_user/readme.txt)**
 
