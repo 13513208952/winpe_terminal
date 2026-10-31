@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "qemu": "/usr/bin/qemu-system-x86_64",
+  "iso": "assets/winpe.iso",
+  "memory_mib": 1024,
+  "cpus": 2,
+  "boot_timeout_seconds": 180,
+  "shutdown_timeout_seconds": 30,
+  "allowed_devices": []
+}

@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+# Purge removes WPT's own directories. They are created by postinst, so
+# everything inside them belongs to WPT; removing the trees keeps `apt purge`
+# predictable and idempotent. No other path is touched.
+
+case "$1" in
+    purge)
+        rm -rf -- /var/lib/winpe-terminal
+        rm -rf -- /var/cache/winpe-terminal
+        rm -rf -- /var/log/winpe-terminal
+        rm -rf -- /etc/winpe-terminal
+        ;;
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        # `apt remove` keeps configuration, the prepared image and instance
+        # records so that a later reinstall finds them again.
+        ;;
+    *)
+        echo "postrm called with unknown argument '$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

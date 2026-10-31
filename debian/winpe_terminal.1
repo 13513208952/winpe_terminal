@@ -1,0 +1,89 @@
+.TH WINPE_TERMINAL 8 "2026-11-01" "winpe-terminal 1.0.0" "System Administration"
+.SH NAME
+winpe_terminal \- run Windows PE in QEMU/KVM and use it from this terminal
+.SH SYNOPSIS
+.B winpe_terminal
+.I start
+.RB [ \-/dev/partition ]
+.br
+.B winpe_terminal
+.BR prepare " [" \-\-force ]
+.br
+.B winpe_terminal
+.BR setting | reload | \-help
+.br
+.B sudo winpe_terminal
+.B \-status
+.br
+.B sudo winpe_terminal
+.BR terminate | stop | shutdown | end | exit
+.RB [ \-f ]
+.RB [ \-x=UUID ]
+.br
+.B sudo winpe_terminal
+.B \-unistall
+.SH DESCRIPTION
+.B winpe_terminal
+starts a Windows PE virtual machine with QEMU/KVM and connects its native
+Emergency Management Services console to the calling terminal, so Windows
+commands such as \fBchkdsk\fP can be run without rebooting the machine.
+.PP
+Windows PE is not part of the package. Run
+.B sudo winpe_terminal prepare
+once to fetch the official Microsoft components after accepting Microsoft's
+licence, and to build the image locally.
+.SH COMMANDS
+.TP
+.B start
+Start one instance and attach this terminal to it. The terminal and the
+instance are one-to-one: closing the terminal stops its instance.
+.TP
+.BI start " \-/dev/partition"
+Additionally expose one whitelisted, unmounted partition to the guest as a
+synthetic MBR disk. The device path is given as a single argument with a
+leading dash.
+.TP
+.B prepare
+Download, verify and build the WinPE image. Interrupted downloads resume on
+the next run.
+.TP
+.B setting
+Show or edit the configuration in \fI/etc/winpe-terminal/config.json\fP.
+Saving as a normal user asks for graphical authorisation.
+.TP
+.B reload
+Re-read and validate the configuration. Only later starts are affected.
+.TP
+.B \-status
+Report running instances with their UUID, uptime, PIDs, memory, CPU and the
+device that was attached.
+.TP
+.B terminate, stop, shutdown, end, exit
+Ask every running instance to shut down. With
+.B \-f
+the shutdown is forced, which can lose unwritten data. With
+.BI \-x= UUID
+only that instance is targeted.
+.TP
+.B \-unistall
+Stop running instances and hand the removal to
+.BR "apt-get purge winpe-terminal" .
+The spelling is intentional.
+.SH FILES
+.TP
+.I /etc/winpe-terminal/config.json
+Configuration file managed as a dpkg conffile.
+.TP
+.I /var/lib/winpe-terminal/
+State: the prepared image, build receipt and instance records.
+.TP
+.I /var/cache/winpe-terminal/
+Download cache and build scratch space; safe to delete.
+.TP
+.I /var/log/winpe-terminal/
+One log per instance, named after the instance UUID.
+.SH SEE ALSO
+.BR qemu-system-x86_64 (1),
+.BR chkdsk .
+.PP
+/usr/share/doc/winpe-terminal/readme.txt

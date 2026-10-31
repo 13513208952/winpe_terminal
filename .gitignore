@@ -1,0 +1,48 @@
+# Python/build artifacts do not belong in the source workspace.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+.venv/
+*.kate-swp
+
+# Installation/runtime files belong in the authorized external asset directory.
+/main_program/config.json
+/main_program/installation.json
+/main_program/instances/
+/main_program/assets/
+/main_program/logs/
+/main_program/.install.lock
+
+# VM images and compiled tools must not be committed.
+*.iso
+*.wim
+*.vhd
+*.vhdx
+*.qcow2
+*.img
+*.exe
+*.dll
+*.deb
+*.log
+
+# Microsoft terms: private reading copies, not cleared for public redistribution.
+/document/for_user/licenses/third_party/microsoft/local-only/
+
+# Debian packaging build products.
+debian/files
+debian/.debhelper/
+debian/winpe-terminal/
+debian/debhelper-build-stamp
+/debian/*.substvars
+/debian/*.debhelper.log
+/*.deb
+/*.build
+/*.buildinfo
+/*.changes
+/*.dsc
+/*.tar.*

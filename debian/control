@@ -1,0 +1,34 @@
+Source: winpe-terminal
+Section: admin
+Priority: optional
+Maintainer: winpe_terminal contributors <noreply@example.invalid>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/13513208952/winpe_terminal
+
+Package: winpe-terminal
+Architecture: amd64
+Depends: python3 (>= 3.10),
+         qemu-system-x86,
+         curl,
+         7zip | p7zip-full,
+         xorriso,
+         wimtools,
+         msitools,
+         libhivex-bin,
+         ${misc:Depends}
+Description: run Windows PE in QEMU/KVM from a Linux terminal
+ winpe_terminal starts a Windows PE virtual machine with QEMU/KVM and passes
+ the Windows command prompt through to the Linux terminal using the native
+ Emergency Management Services console.
+ .
+ It is meant for dual-boot users who need Windows-native maintenance tools
+ such as chkdsk on their own partitions without rebooting. Only partitions the
+ user explicitly whitelists and connects are exposed, through a synthetic MBR
+ disk served over a private NBD channel.
+ .
+ Windows PE itself is not part of this package. The first run of
+ "sudo winpe_terminal prepare" fetches the official Microsoft components after
+ asking you to read and accept Microsoft's licence, then builds the image
+ locally.

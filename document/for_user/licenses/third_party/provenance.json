@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "scope": "current direct components and build/viewing tools; not a complete redistribution compliance audit",
+  "entries": [
+    {
+      "component": "qemu",
+      "role": "runtime",
+      "upstream": "https://www.qemu.org/",
+      "notice": "notices/qemu.copyright.txt",
+      "sha256": "2b11eda447e08f58e5d840e5aca5e4d1ea39856b4c868554ba2846f653da3017",
+      "source_member": "usr/share/doc/qemu-system-common/copyright",
+      "package": "qemu-system-common",
+      "version": "1:10.2.1+ds-1ubuntu3.3",
+      "archive": "qemu-system-common_1%3a10.2.1+ds-1ubuntu3.3_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/q/qemu/qemu-system-common_10.2.1%2bds-1ubuntu3.3_amd64.deb"
+    },
+    {
+      "component": "seabios",
+      "role": "firmware",
+      "upstream": "https://www.seabios.org/",
+      "notice": "notices/seabios.copyright.txt",
+      "sha256": "58b417317de591441140835ec61a35518441e465e2149aa8580a46e2ac6c18a7",
+      "source_member": "usr/share/doc/seabios/copyright",
+      "package": "seabios",
+      "version": "1.17.0-1ubuntu1",
+      "archive": "seabios_1.17.0-1ubuntu1_all.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/s/seabios/seabios_1.17.0-1ubuntu1_all.deb"
+    },
+    {
+      "component": "libfdt",
+      "role": "private-qemu-library",
+      "upstream": "https://www.devicetree.org/",
+      "notice": "notices/libfdt.copyright.txt",
+      "sha256": "2ed9ffa8dca225e268d449aaf36800ed6210a58c768a1eabbac122da246d1635",
+      "source_member": "usr/share/doc/libfdt1/copyright",
+      "package": "libfdt1",
+      "version": "1.7.2-2ubuntu1",
+      "archive": "libfdt1_1.7.2-2ubuntu1_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/d/device-tree-compiler/libfdt1_1.7.2-2ubuntu1_amd64.deb"
+    },
+    {
+      "component": "libpmem",
+      "role": "private-qemu-library",
+      "upstream": "https://github.com/pmem/pmdk",
+      "notice": "notices/libpmem.copyright.txt",
+      "sha256": "4e2aa16625fe2896dd1bf091a3f14849f7cdad0e3d9768aaab0c127670824eb0",
+      "source_member": "usr/share/doc/libpmem1/copyright",
+      "package": "libpmem1",
+      "version": "1.13.1-1.1ubuntu4",
+      "archive": "libpmem1_1.13.1-1.1ubuntu4_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/p/pmdk/libpmem1_1.13.1-1.1ubuntu4_amd64.deb"
+    },
+    {
+      "component": "librdmacm",
+      "role": "private-qemu-library",
+      "upstream": "https://github.com/linux-rdma/rdma-core",
+      "notice": "notices/librdmacm.copyright.txt",
+      "sha256": "347f499a99055771ef8d23f4832f7a88d4313a72c33210fe3f362cc73f0c78cf",
+      "source_member": "usr/share/doc/librdmacm1t64/copyright",
+      "package": "librdmacm1t64",
+      "version": "61.0-2ubuntu3",
+      "archive": "librdmacm1t64_61.0-2ubuntu3_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/r/rdma-core/librdmacm1t64_61.0-2ubuntu3_amd64.deb"
+    },
+    {
+      "component": "libslirp",
+      "role": "private-qemu-library",
+      "upstream": "https://gitlab.freedesktop.org/slirp/libslirp",
+      "notice": "notices/libslirp.copyright.txt",
+      "sha256": "cf36041c93e4288fe77d84b4580040d21baef1deb5f065f4ce4c93601db9cb6d",
+      "source_member": "usr/share/doc/libslirp0/copyright",
+      "package": "libslirp0",
+      "version": "4.9.1-1ubuntu1.1",
+      "archive": "libslirp0_4.9.1-1ubuntu1.1_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/libs/libslirp/libslirp0_4.9.1-1ubuntu1.1_amd64.deb"
+    },
+    {
+      "component": "libndctl",
+      "role": "private-qemu-library",
+      "upstream": "https://github.com/pmem/ndctl",
+      "notice": "notices/libndctl.copyright.txt",
+      "sha256": "08c91e2985450b08ec7bee049c0c1f897dfa60d94fc4dea65c0a9564f8b6d1f8",
+      "source_member": "usr/share/doc/libndctl6/copyright",
+      "package": "libndctl6",
+      "version": "81-1ubuntu1",
+      "archive": "libndctl6_81-1ubuntu1_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/n/ndctl/libndctl6_81-1ubuntu1_amd64.deb"
+    },
+    {
+      "component": "libdaxctl",
+      "role": "private-qemu-library",
+      "upstream": "https://github.com/pmem/ndctl",
+      "notice": "notices/libdaxctl.copyright.txt",
+      "sha256": "08c91e2985450b08ec7bee049c0c1f897dfa60d94fc4dea65c0a9564f8b6d1f8",
+      "source_member": "usr/share/doc/libdaxctl1/copyright",
+      "package": "libdaxctl1",
+      "version": "81-1ubuntu1",
+      "archive": "libdaxctl1_81-1ubuntu1_amd64.deb",
+      "source_url": "https://archive.ubuntu.com/ubuntu/pool/main/n/ndctl/libdaxctl1_81-1ubuntu1_amd64.deb"
+    },
+    {
+      "component": "python",
+      "role": "system-runtime",
+      "upstream": "https://www.python.org/",
+      "notice": "notices/python.copyright.txt",
+      "sha256": "f1cbf908e1daa8789b389fdcf17811ed36b675d736b39a103591399861350382",
+      "source_member": "usr/share/doc/python3.14/copyright",
+      "version": "3.14.4-1ubuntu0.2",
+      "source": "system-provided, not bundled by winpe_terminal"
+    },
+    {
+      "component": "7zip",
+      "role": "system-build-tool",
+      "upstream": "https://www.7-zip.org/",
+      "notice": "notices/7zip.copyright.txt",
+      "sha256": "76b37e76cecaf95213e2dde8d8d149761755b35b12fc4137ed597c5592933806",
+      "source_member": "usr/share/doc/7zip/copyright",
+      "version": "26.00+dfsg-1",
+      "source": "system-provided, not bundled by winpe_terminal"
+    },
+    {
+      "component": "xorriso",
+      "role": "system-image-tool",
+      "upstream": "https://www.gnu.org/software/xorriso/",
+      "notice": "notices/xorriso.copyright.txt",
+      "sha256": "6a0d5bcd8280fa0b5da982b8619cee268e33c8b2f9b5440273705d587c637606",
+      "source_member": "usr/share/doc/xorriso/copyright",
+      "version": "1:1.5.6-1.1ubuntu4",
+      "source": "system-provided, not bundled by winpe_terminal"
+    },
+    {
+      "document": "GPL-2",
+      "source": "/usr/share/common-licenses/GPL-2",
+      "path": "license-texts/GPL-2.txt",
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    },
+    {
+      "document": "GPL-3",
+      "source": "/usr/share/common-licenses/GPL-3",
+      "path": "license-texts/GPL-3.txt",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "document": "LGPL-2",
+      "source": "/usr/share/common-licenses/LGPL-2",
+      "path": "license-texts/LGPL-2.txt",
+      "sha256": "cc535c21133c895b56b374c8a1dc1eb948d99003ed2b47372069456b62f42b24"
+    },
+    {
+      "document": "LGPL-2.1",
+      "source": "/usr/share/common-licenses/LGPL-2.1",
+      "path": "license-texts/LGPL-2.1.txt",
+      "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95"
+    },
+    {
+      "document": "LGPL-3",
+      "source": "/usr/share/common-licenses/LGPL-3",
+      "path": "license-texts/LGPL-3.txt",
+      "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118"
+    },
+    {
+      "document": "GFDL-1.2",
+      "source": "/usr/share/common-licenses/GFDL-1.2",
+      "path": "license-texts/GFDL-1.2.txt",
+      "sha256": "2652c22ba086f92e55ae4a9f9c890ad4766ffd7814a73d318e22a597edf857a4"
+    },
+    {
+      "document": "GFDL-1.3",
+      "source": "/usr/share/common-licenses/GFDL-1.3",
+      "path": "license-texts/GFDL-1.3.txt",
+      "sha256": "110535522396708cea37c72a802c5e7e81391139f5f7985631c93ef242b206a4"
+    },
+    {
+      "document": "Artistic",
+      "source": "/usr/share/common-licenses/Artistic",
+      "path": "license-texts/Artistic.txt",
+      "sha256": "b7fd9b73ea99602016a326e0b62e6646060d18febdd065ceca8bb482208c3d88"
+    },
+    {
+      "document": "CC0-1.0",
+      "source": "/usr/share/common-licenses/CC0-1.0",
+      "path": "license-texts/CC0-1.0.txt",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499"
+    },
+    {
+      "document": "MPL-2.0",
+      "source": "/usr/share/common-licenses/MPL-2.0",
+      "path": "license-texts/MPL-2.0.txt",
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    {
+      "document": "Apache-2.0",
+      "source": "/usr/share/common-licenses/Apache-2.0",
+      "path": "license-texts/Apache-2.0.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "document": "GCC Runtime Library Exception 3.1",
+      "source": "notices/gcc-mingw-w64.copyright.txt",
+      "path": "license-texts/GCC-Runtime-Library-Exception-3.1.txt",
+      "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74"
+    },
+    {
+      "component": "msitools",
+      "role": "build",
+      "upstream": "https://wiki.gnome.org/msitools",
+      "notice": "notices/msitools.copyright.txt",
+      "sha256": "530210a98ab48efb5533820dc58e1f3c7437876e769b2b4b7aac2924f29fb449",
+      "source_member": "usr/share/doc/msitools/copyright",
+      "package": "msitools",
+      "version": "0.106+repack-2",
+      "source_url": "Ubuntu archive package msitools 0.106+repack-2 (private extraction, no system install)"
+    },
+    {
+      "component": "libmsi",
+      "role": "build",
+      "upstream": "https://wiki.gnome.org/msitools",
+      "notice": "notices/libmsi.copyright.txt",
+      "sha256": "530210a98ab48efb5533820dc58e1f3c7437876e769b2b4b7aac2924f29fb449",
+      "source_member": "usr/share/doc/libmsi-1.0-0/copyright",
+      "package": "libmsi-1.0-0",
+      "version": "0.106+repack-2",
+      "source_url": "Ubuntu archive package libmsi-1.0-0 0.106+repack-2 (private extraction, no system install)"
+    },
+    {
+      "component": "libgsf",
+      "role": "build",
+      "upstream": "https://gitlab.gnome.org/GNOME/libgsf",
+      "notice": "notices/libgsf.copyright.txt",
+      "sha256": "b632953540beb8c71d94d7d3369bef8911d1f9bf2c28bbec0084f9660460b999",
+      "source_member": "usr/share/doc/libgsf-1-114/copyright",
+      "package": "libgsf-1-114",
+      "version": "1.14.53-1.1",
+      "source_url": "Ubuntu archive package libgsf-1-114 1.14.53-1.1 (private extraction, no system install)"
+    },
+    {
+      "component": "wimlib-tools",
+      "role": "build",
+      "upstream": "https://wimlib.net/",
+      "notice": "notices/wimlib-tools.copyright.txt",
+      "sha256": "ddf0df394767d6a76d5a89358910407c756e58709121957d78f2ac0943c37081",
+      "source_member": "usr/share/doc/wimtools/copyright",
+      "package": "wimtools",
+      "version": "1.14.5-1",
+      "source_url": "Ubuntu archive package wimtools 1.14.5-1 (private extraction, no system install)"
+    },
+    {
+      "component": "wimlib-library",
+      "role": "build",
+      "upstream": "https://wimlib.net/",
+      "notice": "notices/wimlib-library.copyright.txt",
+      "sha256": "ddf0df394767d6a76d5a89358910407c756e58709121957d78f2ac0943c37081",
+      "source_member": "usr/share/doc/libwim15t64/copyright",
+      "package": "libwim15t64",
+      "version": "1.14.5-1",
+      "source_url": "Ubuntu archive package libwim15t64 1.14.5-1 (private extraction, no system install)"
+    },
+    {
+      "component": "hivex",
+      "role": "build",
+      "upstream": "https://libguestfs.org/hivex.3.html",
+      "notice": "notices/hivex.copyright.txt",
+      "sha256": "f87976748bcc55612cf07f82e1bbf1f19eba3fc79be4033f6ccdd25a723d802a",
+      "source_member": "usr/share/doc/libhivex-bin/copyright",
+      "package": "libhivex-bin",
+      "version": "1.3.24-2.1build2",
+      "source_url": "Ubuntu archive package libhivex-bin 1.3.24-2.1build2 (private extraction, no system install)"
+    }
+  ]
+}

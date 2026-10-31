@@ -1,0 +1,72 @@
+winpe-terminal (1.0.0) unstable; urgency=medium
+
+  * First release.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 03:45:00 +0800
+
+winpe-terminal (0.1.7) unstable; urgency=medium
+
+  * Drop licence notices for the retired bridge toolchain (MinGW, GCC,
+    Binutils) and for LibreOffice; the release neither builds nor ships them.
+  * Clarify that QEMU and its dependencies come from the distribution.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 03:35:00 +0800
+
+winpe-terminal (0.1.6) unstable; urgency=medium
+
+  * postrm purge removes WPT's four directories with rm -rf again. Preserving
+    unknown files left the state and log directories behind after a purge,
+    which made the uninstall look incomplete; those directories are created by
+    postinst and hold only WPT-managed content.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 03:20:00 +0800
+
+winpe-terminal (0.1.5) unstable; urgency=medium
+
+  * prepare shows what it is doing: every step is flushed immediately and
+    curl draws a progress bar, so a long download no longer looks like a hang.
+  * Add --accept-microsoft-license for an explicit non-interactive consent
+    (the licence text is still printed; nothing is accepted silently).
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 03:05:00 +0800
+
+winpe-terminal (0.1.4) unstable; urgency=medium
+
+  * postrm purge: rmdir --ignore-fail-on-non-empty always succeeded, so files
+    that WPT does not own were never reported. Purge now removes WPT's own
+    instance logs and reports anything else it leaves behind, keeping the
+    directory instead of silently claiming a clean sweep.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 02:55:00 +0800
+
+winpe-terminal (0.1.3) unstable; urgency=medium
+
+  * prepare also removes the extracted installer bootstraps, so the build
+    directory is empty again after a successful run.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 02:40:00 +0800
+
+winpe-terminal (0.1.2) unstable; urgency=medium
+
+  * prepare now removes its build scratch directory: after a successful
+    publish, and before starting a new build. The verified download cache is
+    kept so a retry does not download again.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 02:30:00 +0800
+
+winpe-terminal (0.1.1) unstable; urgency=medium
+
+  * Fix prepare: the builder stored its build directory in an attribute named
+    like its build() method, so the first real run crashed immediately.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 02:20:00 +0800
+
+winpe-terminal (0.1.0) unstable; urgency=medium
+
+  * First packaged release.
+  * QEMU/KVM Windows PE start with EMS/SAC terminal pass-through.
+  * Explicit partition whitelist, identity checks and synthetic NBD disk.
+  * prepare builds the local WinPE image from official Microsoft payloads.
+  * Instance records, status, graceful shutdown and apt-integrated uninstall.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 01 Nov 2026 02:00:00 +0800

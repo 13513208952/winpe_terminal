@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+
+# Preserve third-party legal originals byte-for-byte, including whitespace.
+document/for_user/licenses/third_party/notices/*.txt -text -whitespace
+document/for_user/licenses/third_party/license-texts/*.txt -text -whitespace

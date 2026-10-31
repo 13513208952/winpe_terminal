@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+# Upgrading or removing the package while a VM is running would pull files out
+# from under it. Refuse and let the user shut the instance down first.
+case "$1" in
+    remove|upgrade|deconfigure)
+        if command -v winpe_terminal >/dev/null 2>&1; then
+            if ! winpe_terminal -instances-active >/dev/null 2>&1; then
+                echo "winpe_terminal: 仍有实例在运行。" >&2
+                echo "请先用 'sudo winpe_terminal -status' 查看，" >&2
+                echo "并用 'sudo winpe_terminal stop' 正常关机后再操作。" >&2
+                exit 1
+            fi
+        fi
+        ;;
+    failed-upgrade)
+        ;;
+    *)
+        echo "prerm called with unknown argument '$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

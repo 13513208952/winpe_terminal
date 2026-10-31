@@ -1,0 +1,172 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: wimlib
+Source: http://wimlib.net/
+
+Files: *
+Copyright: 2012, 2013, 2014 Eric Biggers <ebiggers3@gmail.com>
+License: GPL3.0+-with-exception
+ Unless otherwise specified, wimlib and all programs and scripts distributed with
+ it may be redistributed and/or modified under the terms of the GNU General
+ Public License; either version 3 of the License, or (at your option) any later
+ version.  See COPYING.GPLv3.
+ .
+ However, the following exception is granted.  When not prohibited by conflict
+ with a third-party software license, you may opt to redistribute and/or modify
+ the library portion of wimlib under the terms of the GNU Lesser General Public
+ License; either version 3 of the License, or (at your option) any later version.
+ See COPYING.LGPLv3.
+ .
+ The following paragraph is informational only.  The above exception is known to
+ be relevant for the third-party library "libntfs-3g", which is licensed GPLv2+.
+ On UNIX-like systems, wimlib can optionally be compiled with libntfs-3g support.
+ However, a binary copy of wimlib that was compiled without libntfs-3g support
+ need not be affected by the libntfs-3g license (for example).
+ .
+ On Debian systems, the complete text of the GNU General Public License version
+ 3 can be found in "/usr/share/common-licenses/GPL-3" and the complete text of
+ the GNU Lesser General Public License version 3 can be found in
+ "/usr/share/common-licenses/LGPL-3".
+
+Files: programs/imagex.c
+Copyright: 2012, 2013, 2014, 2015 Eric Biggers
+License: GPL-3.0+
+
+Files: src/lzx_compress.c
+       src/util.c
+       src/metadata_resource.c
+       src/wim.c
+       src/win32_common.c
+       src/unix_apply.c
+       src/lzx_decompress.c
+       src/xml.c
+       src/reparse.c
+       src/resource.c
+       src/template.c
+       src/unix_capture.c
+       src/xpress_decompress.c
+       src/split.c
+       src/integrity.c
+       src/export_image.c
+       src/lzms_common.c
+       src/lzx_common.c
+       src/inode_fixup.c
+       src/inode_table.c
+       src/update_image.c
+       src/iterate_dir.c
+       src/error.c
+       src/blob_table.c
+       src/ntfs-3g_capture.c
+       src/extract.c
+       src/header.c
+       src/tagged_items.c
+       src/progress.c
+       src/mount_image.c
+       src/win32_replacements.c
+       src/solid.c
+       src/lzms_decompress.c
+       src/security.c
+       src/reference.c
+       src/xpress_compress.c
+       src/verify.c
+       src/pathlist.c
+       src/compress_serial.c
+       src/win32_apply.c
+       src/compress_parallel.c
+       src/ntfs-3g_apply.c
+       src/lzms_compress.c
+       src/timestamp.c
+       src/encoding.c
+       src/write.c
+       src/inode.c
+       src/dentry.c
+       src/wimboot.c
+       src/win32_capture.c
+       src/paths.c
+       src/delete_image.c
+       src/add_image.c
+       src/file_io.c
+       src/join.c
+       src/decompress.c
+       src/textfile.c
+       src/compress.c
+Copyright: 2012, 2013, 2014, 2015 Eric Biggers
+License: LGPL-3.0+
+
+Files: src/avl_tree.c
+       src/sha1.c
+       src/decompress_common.c
+       src/compress_common.c
+       src/lcpit_matchfinder.c
+       examples/*
+Copyright: 2014 Eric Biggers
+License: Public-Domain
+ The author dedicates this file to the public domain.
+ You can do whatever you want with this file.
+
+Files: programs/wgetopt.c
+Copyright: 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+           1997, 1998, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+           2008, 2009, 2010 Free Software Foundation, Inc.
+License: GPL-3.0+
+
+Files: src/divsufsort.c
+Copyright: 2003-2008 Yuta Mori
+License: MIT
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation
+ files (the "Software"), to deal in the Software without
+ restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the
+ Software is furnished to do so, subject to the following
+ conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+
+Files: debian/*
+Copyright: 2014 Hilko Bengen <bengen@debian.org>
+License: GPL-3.0+
+
+License: GPL-3.0+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: LGPL-3.0+
+ This package is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in "/usr/share/common-licenses/LGPL-3".

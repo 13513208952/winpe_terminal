@@ -1,0 +1,25 @@
+#!/usr/bin/python3 -I
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 winpe_terminal contributors
+"""Command entry point. Finds its own modules and ignores caller import paths."""
+import sys
+from pathlib import Path
+
+# Never write bytecode: /usr/lib and /usr/bin are package-managed.
+sys.dont_write_bytecode = True
+here = Path(__file__).resolve().parent
+
+# Installed layout: /usr/bin/winpe_terminal with /usr/lib/winpe-terminal/wpt/.
+# Development layout: the modules sit next to this script.
+program = next((path for path in (here, here.parent / "lib/winpe-terminal")
+                if (path / "wpt" / "cli.py").is_file()), None)
+if program is None:
+    sys.stderr.write("winpe_terminal: 找不到程序模块，软件包可能损坏。\n")
+    raise SystemExit(1)
+
+sys.path[:] = [str(program)] + [p for p in sys.path if p and p not in (str(Path.cwd()), str(program))]
+from wpt.cli import main
+from wpt.paths import Layout
+
+if __name__ == "__main__":
+    raise SystemExit(main(Layout()))

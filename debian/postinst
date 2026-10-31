@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        # Runtime directories are state, not package content: create them if
+        # missing and never touch what is already there.
+        install -d -m 0755 -o root -g root /var/lib/winpe-terminal
+        install -d -m 0755 -o root -g root /var/lib/winpe-terminal/assets
+        install -d -m 0755 -o root -g root /var/lib/winpe-terminal/instances
+        install -d -m 0755 -o root -g root /var/cache/winpe-terminal
+        install -d -m 0755 -o root -g root /var/cache/winpe-terminal/downloads
+        install -d -m 0755 -o root -g root /var/cache/winpe-terminal/build
+        install -d -m 0755 -o root -g root /var/cache/winpe-terminal/tmp
+        install -d -m 0755 -o root -g root /var/log/winpe-terminal
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        echo "postinst called with unknown argument '$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0
