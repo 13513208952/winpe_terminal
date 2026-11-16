@@ -13,16 +13,24 @@ import sys
 import termios
 import time
 import tty
+import uuid
 from pathlib import Path
 
 from . import WptError
 from .partition import NBDService, PartitionDisk
 from .registry import now, process_info
-from .safety import open_target
+from .safety import inventory, ntfs_paths, open_target
 from .sac import SacConsole, Tail
 from .qmp import QMP
 
 _LIBC = ctypes.CDLL(None, use_errno=True)
+CHKDSK_DRIVES = tuple("CDEFGHIJKLMNOPQRSTUVWYZ")
+CHKDSK_COMMAND = (
+    "for %D in (" + " ".join(CHKDSK_DRIVES)
+    + r") do @if exist %D:\nul chkdsk %D: /f"
+)
+
+
 
 
 def require_root():
@@ -51,7 +59,7 @@ def child_guard(parent_pid):
     os.umask(0o077)
 
 
-def qemu_arguments(binary, config, ident, iso_fd, qmp_fd, serial_fd, nbd=None):
+def qemu_arguments(binary, config, ident, iso_fd, qmp_fd, serial_fd, nbd_fds=()):
     args = [str(binary), "-name", "winpe_terminal-" + ident, "-uuid", ident,
             "-machine", "pc,accel=kvm", "-cpu", "host", "-m", str(config["memory_mib"]),
             "-smp", str(config["cpus"]), "-nodefaults", "-no-user-config", "-no-reboot",
@@ -65,9 +73,17 @@ def qemu_arguments(binary, config, ident, iso_fd, qmp_fd, serial_fd, nbd=None):
             "-add-fd", f"fd={iso_fd},set=1,opaque=winpe-iso",
             "-drive", "if=none,id=boot,format=raw,readonly=on,file=/dev/fdset/1",
             "-device", "ide-cd,drive=boot,bus=ide.1"]
-    if nbd:
-        args += ["-blockdev", f"driver=nbd,node-name=target,server.type=fd,server.str={nbd}",
-                 "-device", "ide-hd,drive=target,bus=ide.0"]
+    for index, nbd_fd in enumerate(nbd_fds):
+        target = f"target{index}"
+        args += ["-blockdev",
+                 f"driver=nbd,node-name={target},server.type=fd,server.str={nbd_fd}"]
+        if index == 0:
+            args += ["-device", f"ide-hd,drive={target},bus=ide.0"]
+            continue
+        sata_index, port = divmod(index - 1, 6)
+        if port == 0:
+            args += ["-device", f"ich9-ahci,id=sata{sata_index}"]
+        args += ["-device", f"ide-hd,drive={target},bus=sata{sata_index}.{port}"]
     return args
 
 
@@ -106,6 +122,8 @@ class Supervisor:
         self.log_fd = None
         self.guest_ready = False
         self.serial_received = 0
+        self.startup_command = None
+        self.startup_sent = False
 
     def log(self, event, **fields):
         if self.log_fd is not None:
@@ -122,7 +140,7 @@ class Supervisor:
         elif self.request is None:
             self.request = "graceful"
 
-    def run(self, device_path=None, startup_complete=None):
+    def run(self, device_path=None, startup_complete=None, *, automatic_chkdsk=False):
         require_root()
         if not os.isatty(0) or not os.isatty(1):
             raise WptError("start 必须在可交互终端运行；不支持后台或管道启动。")
@@ -135,7 +153,7 @@ class Supervisor:
         iso = self.configuration.resolve(self.config["iso"])
         if not iso.is_file():
             raise WptError(f"WinPE 资源尚未准备：{iso}\n请先运行：sudo winpe_terminal prepare")
-        terminal, process, nbd, path, record = Terminal(), None, None, None, None
+        terminal, process, nbds, path, record = Terminal(), None, [], None, None
         handlers = {}
         log_path = None
         failed = None
@@ -147,14 +165,32 @@ class Supervisor:
                 stack.callback(os.close, iso_fd)
                 if not stat.S_ISREG(os.fstat(iso_fd).st_mode):
                     raise WptError("ISO 必须是普通文件。")
-                device, device_fd = None, None
-                if device_path:
-                    device_fd, device = open_target(device_path, self.config, self.configuration.layout.state_dir)
+                target_paths = [device_path] if device_path else []
+                if automatic_chkdsk:
+                    target_paths = ntfs_paths(inventory())
+                    if len(target_paths) > len(CHKDSK_DRIVES):
+                        raise WptError(
+                            f"检测到 {len(target_paths)} 个 NTFS 分区，超过可分配的 "
+                            f"{len(CHKDSK_DRIVES)} 个 WinPE 盘符；未启动修复。")
+                    print("自动修复目标：" + "、".join(target_paths), flush=True)
+                    self.startup_command = CHKDSK_COMMAND
+                devices, device_fds = [], []
+                for target_path in target_paths:
+                    device_fd, device = open_target(
+                        target_path, self.config, self.configuration.layout.state_dir,
+                        automatic_ntfs=automatic_chkdsk)
                     stack.callback(os.close, device_fd)
-                path, record = self.registry.create(user, device, self.config)
-                if device:
-                    disk = PartitionDisk(device_fd, device["size_bytes"], device["start_sector"], record["uuid"])
-                    nbd = NBDService(disk)
+                    device_fds.append(device_fd)
+                    devices.append(device)
+                primary_device = devices[0] if devices else None
+                path, record = self.registry.create(
+                    user, primary_device, self.config, devices=devices,
+                    command="chkdsk" if automatic_chkdsk else "start")
+                for index, (device_fd, device) in enumerate(zip(device_fds, devices)):
+                    disk_ident = str(uuid.uuid5(uuid.UUID(record["uuid"]), str(index)))
+                    nbd = NBDService(PartitionDisk(
+                        device_fd, device["size_bytes"], device["start_sector"], disk_ident))
+                    nbds.append(nbd)
                     stack.callback(nbd.close)
                 qmp_host, qmp_child = socket.socketpair()
                 serial_host, serial_child = socket.socketpair()
@@ -166,22 +202,26 @@ class Supervisor:
                 self.log_fd = log_fd
                 log_owner = pwd.getpwuid(user["uid"])
                 os.fchown(log_fd, log_owner.pw_uid, log_owner.pw_gid)
-                args = qemu_arguments(binary, self.config, record["uuid"], iso_fd,
-                                      qmp_child.fileno(), serial_child.fileno(), nbd.client.fileno() if nbd else None)
-                self.log("launch", uuid=record["uuid"], memory_mib=self.config["memory_mib"], iso=str(iso), device=device, qemu_args=args)
+                args = qemu_arguments(
+                    binary, self.config, record["uuid"], iso_fd, qmp_child.fileno(),
+                    serial_child.fileno(), [nbd.client.fileno() for nbd in nbds])
+                self.log("launch", uuid=record["uuid"], memory_mib=self.config["memory_mib"],
+                         iso=str(iso), devices=devices, qemu_args=args,
+                         startup_command="chkdsk-all-ntfs" if automatic_chkdsk else None)
                 print(f"启动实例 {record['sequence']} / {record['uuid']}；等待 WinPE 终端桥接……", flush=True)
                 print(f"启动日志：{log_path}", flush=True)
                 parent_pid = os.getpid()
+                pass_fds = (iso_fd, qmp_child.fileno(), serial_child.fileno(),
+                            *(nbd.client.fileno() for nbd in nbds))
                 process = subprocess.Popen(
                     args, stdin=subprocess.DEVNULL, stdout=log_fd, stderr=log_fd,
-                    pass_fds=(iso_fd, qmp_child.fileno(), serial_child.fileno()) + ((nbd.client.fileno(),) if nbd else ()),
-                    close_fds=True, start_new_session=True,
+                    pass_fds=pass_fds, close_fds=True, start_new_session=True,
                     user=account.pw_uid, group=account.pw_gid,
                     extra_groups=os.getgrouplist(account.pw_name, account.pw_gid),
                     preexec_fn=lambda: child_guard(parent_pid),
                     cwd="/", env={"PATH": "/usr/bin:/bin", "HOME": "/nonexistent", "LC_ALL": "C"},
                 )
-                if nbd:
+                for nbd in nbds:
                     nbd.start()
                 qmp_child.close()
                 serial_child.close()
@@ -194,7 +234,7 @@ class Supervisor:
                 self.log("qmp_connected", status=qmp.command("query-status"))
                 if startup_complete:
                     startup_complete()
-                self.interact(process, serial_host, qmp, terminal, path, record, nbd)
+                self.interact(process, serial_host, qmp, terminal, path, record, nbds)
                 if not self.guest_ready and self.request is None:
                     raise WptError("虚拟机在终端桥接就绪之前退出；QEMU 正常退出不等于 WinPE 桥接启动成功。")
                 if process.returncode != 0 and self.request != "force":
@@ -211,7 +251,7 @@ class Supervisor:
                 if process is not None and process.poll() is None:
                     process.kill()
                     process.wait(timeout=10)
-                if nbd is not None:
+                for nbd in nbds:
                     nbd.close()
                 for number, handler in handlers.items():
                     signal.signal(number, handler)
@@ -229,7 +269,7 @@ class Supervisor:
                     print(f"\nQEMU 日志：{log_path}", file=sys.stderr)
         return 0
 
-    def interact(self, process, serial, qmp, terminal, path, record, nbd):
+    def interact(self, process, serial, qmp, terminal, path, record, nbds):
         """Wait for the SAC console, enter the CMD channel, then pass through I/O.
 
         Boot output is deliberately not shown: winload paints a full-screen
@@ -250,8 +290,9 @@ class Supervisor:
             selector.register(0, selectors.EVENT_READ, "terminal")
             while process.poll() is None:
                 current = time.monotonic()
-                if nbd and nbd.error:
-                    raise WptError("分区代理失败：" + nbd.error)
+                for nbd in nbds:
+                    if nbd.error:
+                        raise WptError("分区代理失败：" + nbd.error)
                 if current >= next_snapshot and (state != "shell" or stopping):
                     try:
                         status = qmp.command("query-status", timeout=1)
@@ -299,7 +340,8 @@ class Supervisor:
                     # The CMD channel did not confirm; keep the console usable
                     # rather than failing the whole session.
                     self.log("shell_prompt_unconfirmed")
-                    self.enter_shell(state="shell", terminal=terminal, path=path, record=record, stopping=stopping)
+                    self.enter_shell(state="shell", terminal=terminal, console=console,
+                                     path=path, record=record, stopping=stopping)
                     state = "shell"
                 selector.modify(serial, selectors.EVENT_READ | (selectors.EVENT_WRITE if console.queued() else 0), "serial")
                 for key, mask in selector.select(0.2):
@@ -363,8 +405,8 @@ class Supervisor:
                                 if tail.is_shell():
                                     self.log("shell_ready", line=tail.last_line().decode("utf-8", "replace"))
                                     self.guest_shell = True
-                                    self.enter_shell(state="shell", terminal=terminal, path=path,
-                                                     record=record, stopping=stopping)
+                                    self.enter_shell(state="shell", terminal=terminal, console=console,
+                                                     path=path, record=record, stopping=stopping)
                                     state = "shell"
                             elif state in ("shell", "sac"):
                                 try:
@@ -386,8 +428,8 @@ class Supervisor:
                                         shell_deadline = time.monotonic() + 20
                                         state = "switch-await"
                                     elif tail.is_shell():
-                                        self.enter_shell(state="shell", terminal=terminal, path=path,
-                                                         record=record, stopping=stopping)
+                                        self.enter_shell(state="shell", terminal=terminal, console=console,
+                                                         path=path, record=record, stopping=stopping)
                                         state = "shell"
 
     def guest_shutdown(self, console, qmp, state, stage=None):
@@ -402,7 +444,11 @@ class Supervisor:
             qmp.command("system_powerdown")
         return "qmp-powerdown"
 
-    def enter_shell(self, *, state, terminal, path, record, stopping):
+    def enter_shell(self, *, state, terminal, console, path, record, stopping):
         terminal.raw()
         self.registry.update(path, record, state="stopping" if stopping else "running",
                              guest={"console": "ems-sac", "channel": "CMD"})
+        if self.startup_command and not self.startup_sent and not stopping:
+            console.command(self.startup_command)
+            self.startup_sent = True
+            self.log("startup_command", command="chkdsk-all-ntfs")

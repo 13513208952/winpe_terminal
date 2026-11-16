@@ -14,7 +14,7 @@ import unittest
 import uuid
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -27,9 +27,10 @@ from wpt.paths import Layout
 from wpt.partition import (MAX_REQUEST, NBD_MAGIC, OPTIONS_MAGIC, REQUEST_MAGIC,
                            SIMPLE_REPLY, NBDService, PartitionDisk, exact, serve)
 from wpt.registry import Registry, matches, notify, process_info
-from wpt.safety import check_selection
+from wpt.safety import check_ntfs_selection, check_selection, ntfs_paths
 from wpt.storage import atomic_json, read_json, safe_directory
-from wpt.vm import Supervisor, Terminal, child_guard, qemu_arguments, require_root
+from wpt.vm import (CHKDSK_COMMAND, Supervisor, Terminal, child_guard,
+                    qemu_arguments, require_root)
 from wpt.qmp import QMP
 
 TEST_ROOT = Path(os.environ["WPT_TEST_ROOT"])  # explicit scratch dir; no machine-specific default
@@ -50,7 +51,7 @@ class Scratch(unittest.TestCase):
 
 class GrammarTests(unittest.TestCase):
     def test_simple_commands(self):
-        for cmd in ("-help", "setting", "reload", "-status", "-unistall"):
+        for cmd in ("-help", "setting", "reload", "-status", "-unistall", "chkdsk"):
             with self.subTest(cmd=cmd):
                 self.assertEqual(parse([cmd]).name, cmd)
         self.assertEqual(parse([]).name, "-help")
@@ -82,7 +83,7 @@ class GrammarTests(unittest.TestCase):
                 parse(["stop", *tail])
 
     def test_root_gating_before_installation(self):
-        for cmd in ("start", "-status", "stop", "-unistall"):
+        for cmd in ("start", "chkdsk", "-status", "stop", "-unistall"):
             output = io.StringIO()
             with patch("os.geteuid", return_value=1000), redirect_stderr(output):
                 self.assertEqual(main(Layout("/does-not-exist"), [cmd]), 1)
@@ -223,6 +224,19 @@ class RegistryTests(Scratch):
         self.assertIsNone(process_info(-1))
         self.assertIsNotNone(process_info(os.getpid()))
 
+    def test_chkdsk_supervisor_process_is_recognized(self):
+        info = {
+            "pid": 123, "ticks": 9, "uid": 0, "cwd": "/",
+            "args": ["/usr/bin/winpe_terminal", "chkdsk"],
+        }
+        record = {
+            "boot_id": "boot", "supervisor_pid": 123, "supervisor_ticks": 9,
+            "command": "chkdsk",
+        }
+        with patch("wpt.registry.boot_id", return_value="boot"), \
+             patch("wpt.registry.process_info", return_value=info):
+            self.assertEqual(matches(record, "supervisor"), info)
+
     def test_pidfd_opened_before_identity_check(self):
         record = {"supervisor_pid": 123}
         calls = []
@@ -256,7 +270,8 @@ class SafetyTests(unittest.TestCase):
             "/dev/nvme0n1p5": {"type": "part", "maj:min": "259:5", "parents": {"/dev/nvme0n1"}},
             "/dev/nvme0n1p3": {"type": "part", "maj:min": "259:3", "parents": {"/dev/nvme0n1"}},
             "/dev/sda": {"type": "disk", "maj:min": "8:0", "parents": set(), "serial": "EXTERNAL"},
-            "/dev/sda1": {"type": "part", "maj:min": "8:1", "parents": {"/dev/sda"}, "size": 8192, "ro": False, "mountpoints": []},
+            "/dev/sda1": {"type": "part", "maj:min": "8:1", "parents": {"/dev/sda"},
+                          "size": 8192, "ro": False, "mountpoints": [], "fstype": "ntfs"},
         }
         self.allowed = [{"path": "/dev/sda1", "serial": "EXTERNAL", "size_bytes": 8192}]
 
@@ -273,6 +288,17 @@ class SafetyTests(unittest.TestCase):
         with self.assertRaises(WptError):
             self.check(allowed=[])
 
+
+    def test_automatic_ntfs_selection_does_not_need_whitelist(self):
+        self.assertEqual(ntfs_paths(self.nodes), ["/dev/sda1"])
+        node = check_ntfs_selection(
+            "/dev/sda1", self.nodes, {"259:5"}, set(), set(), [])
+        self.assertEqual(node["maj:min"], "8:1")
+        self.nodes["/dev/sda1"]["fstype"] = "ext4"
+        with self.assertRaises(WptError):
+            check_ntfs_selection("/dev/sda1", self.nodes, {"259:5"}, set(), set(), [])
+        with self.assertRaisesRegex(WptError, "NTFS"):
+            ntfs_paths(self.nodes)
     def test_mounted_swap_holder_readonly_size_serial(self):
         for kwargs in ({"mounted_devnums": {"8:1"}}, {"swapped_paths": {"/dev/sda1"}}, {"holders": ["dm-0"]}):
             with self.subTest(kwargs=kwargs), self.assertRaises(WptError):
@@ -462,13 +488,17 @@ class PartitionTests(Scratch):
 
 
 class VmSupportTests(unittest.TestCase):
-    def test_qemu_minimal_and_bounded_arguments(self):
-        args = qemu_arguments("/usr/bin/qemu", DEFAULTS, IDENT, 7, 8, 9, 10)
+    def test_qemu_minimal_and_multiple_partition_arguments(self):
+        args = qemu_arguments("/usr/bin/qemu", DEFAULTS, IDENT, 7, 8, 9, [10, 11, 12])
         self.assertIn("pc,accel=kvm", args)
         self.assertIn("none", args)
         self.assertNotIn("-net", args)
-        self.assertIn("ide-hd,drive=target,bus=ide.0", args)
+        self.assertIn("ide-hd,drive=target0,bus=ide.0", args)
+        self.assertIn("ich9-ahci,id=sata0", args)
+        self.assertIn("ide-hd,drive=target1,bus=sata0.0", args)
+        self.assertIn("ide-hd,drive=target2,bus=sata0.1", args)
         self.assertTrue(any("server.type=fd,server.str=10" in arg for arg in args))
+        self.assertTrue(any("server.type=fd,server.str=11" in arg for arg in args))
         self.assertTrue(any("fd=7,set=1" in arg for arg in args))
         self.assertFalse(any("/dev/sd" in arg for arg in args))
 
@@ -494,6 +524,19 @@ class VmSupportTests(unittest.TestCase):
         supervisor.handle_signal(signal.SIGUSR2, None)
         supervisor.handle_signal(signal.SIGUSR1, None)
         self.assertEqual(supervisor.request, "force")
+
+    def test_chkdsk_startup_command_is_queued_once_and_keeps_shell(self):
+        registry, terminal, console = Mock(), Mock(), Mock()
+        supervisor = Supervisor(None, DEFAULTS, registry)
+        supervisor.startup_command = CHKDSK_COMMAND
+        for _ in range(2):
+            supervisor.enter_shell(
+                state="shell", terminal=terminal, console=console,
+                path="record", record={}, stopping=False)
+        console.command.assert_called_once_with(CHKDSK_COMMAND)
+        self.assertIn("chkdsk %D: /f", CHKDSK_COMMAND)
+        self.assertNotIn(" X ", CHKDSK_COMMAND)
+        self.assertIsNone(supervisor.request)
 
 
 class StagingTests(Scratch):

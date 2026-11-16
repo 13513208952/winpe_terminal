@@ -19,6 +19,7 @@
 ```bash
 sudo apt install ./winpe-terminal_<版本>_amd64.deb
 sudo winpe_terminal prepare      # 从微软官方来源获取组件并本地构建 WinPE
+sudo winpe_terminal chkdsk       # 自动检测并修复所有未挂载的 NTFS 分区
 sudo winpe_terminal start        # 或：sudo winpe_terminal start -/dev/nvme0n1p3
 ```
 

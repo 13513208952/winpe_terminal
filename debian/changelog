@@ -1,3 +1,11 @@
+winpe-terminal (1.1.0) unstable; urgency=medium
+
+  * Add `winpe_terminal chkdsk`: discover every unmounted NTFS partition,
+    attach all safe targets without the manual whitelist, run chkdsk /f for
+    each WinPE drive letter, then leave the CMD terminal open.
+
+ -- winpe_terminal contributors <noreply@example.invalid>  Sun, 15 Nov 2026 12:00:00 +0800
+
 winpe-terminal (1.0.0) unstable; urgency=medium
 
   * First release.

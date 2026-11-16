@@ -62,7 +62,8 @@ def matches(record, role):
         launch = record.get("launcher")
         scripts = [Path(a) if Path(a).is_absolute() else Path(info["cwd"]) / a
                    for a in info["args"] if Path(a).name == "winpe_terminal"]
-        if info["uid"] != 0 or "start" not in info["args"]:
+        command = record.get("command", "start")
+        if info["uid"] != 0 or command not in {"start", "chkdsk"} or command not in info["args"]:
             return None
         if launch:
             if not any(str(p.resolve()) == launch for p in scripts):
@@ -113,7 +114,7 @@ class Registry:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
 
-    def create(self, user, device, config):
+    def create(self, user, device, config, *, devices=None, command="start"):
         with self.locked():
             sequence_file = self.directory / ".sequence.json"
             try:
@@ -127,11 +128,14 @@ class Registry:
             atomic_json(sequence_file, {"last": sequence})
             ident, created = str(uuid.uuid4()), now()
             supervisor = process_info(os.getpid())
+            attached = list(devices) if devices is not None else ([device] if device else [])
             record = {
                 "schema": 1, "installation_id": self.installation_id,
                 "sequence": sequence, "uuid": ident, "created_at": created,
-                "started_at": created, "user": user, "device": device,
-                "mount_directory": device.get("mount_directory") if device else None, "state": "starting", "boot_id": boot_id(),
+                "started_at": created, "user": user, "command": command,
+                "device": device, "devices": attached,
+                "mount_directory": device.get("mount_directory") if device else None,
+                "state": "starting", "boot_id": boot_id(),
                 "supervisor_pid": os.getpid(), "supervisor_ticks": supervisor["ticks"],
                 "launcher": launcher_path(),
                 "qemu_pid": None, "qemu_ticks": None,

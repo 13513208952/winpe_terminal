@@ -23,6 +23,7 @@ HELP = """winpe_terminal {version}
 
 sudo winpe_terminal prepare [--force] [--accept-microsoft-license]
 sudo winpe_terminal start [-/dev/目标分区]
+sudo winpe_terminal chkdsk
 winpe_terminal setting
 winpe_terminal reload
 winpe_terminal -help
@@ -31,8 +32,10 @@ sudo winpe_terminal <terminate|stop|shutdown|end|exit> [-f] [-x=UUID]
 sudo winpe_terminal -unistall
 
 prepare 首次下载并构建 Windows PE 资源，需要交互确认微软许可。
+chkdsk 自动接入所有未挂载的 NTFS 分区，依次执行 chkdsk <WinPE盘符> /f，
+完成后保留 WinPE 命令行并继续透传；此快捷命令不使用设备白名单。
 配置重载仅影响后续启动。关闭启动终端会关闭其对应实例。
-存储参数必须是 -/dev/...；默认白名单为空，不自动卸载或修复设备。
+start 的存储参数必须是 -/dev/...；默认白名单为空。
 -f 表示强制关机，可能丢失数据。
 -x=UUID 只关闭指定实例；UUID 取 -status 输出的值，可与其他参数并用。
 """
@@ -51,7 +54,7 @@ def parse(argv):
     if not argv:
         return Command("-help")
     name, *tail = argv
-    if name in {"-help", "reload", "-status", "-unistall", "-instances-active"} and not tail:
+    if name in {"-help", "reload", "-status", "-unistall", "-instances-active", "chkdsk"} and not tail:
         return Command(name)
     if name == "prepare":
         flags = set(tail)
@@ -175,8 +178,10 @@ def status(registry):
             print(f"  QEMU RSS：{qemu['rss_bytes'] / 1048576:.1f} MiB"
                   f"  CPU 累计：{qemu['cpu_seconds']:.2f} s")
         print(f"  内存：{record.get('memory_mib')} MiB / {record.get('cpus')} vCPU")
-        device = record.get('device')
-        print(f"  设备：{device['path'] if device else '未接入'}")
+        devices = record.get("devices")
+        if not isinstance(devices, list):
+            devices = [record["device"]] if record.get("device") else []
+        print("  设备：" + ("、".join(item["path"] for item in devices) if devices else "未接入"))
     return 0
 
 
@@ -267,11 +272,12 @@ def main(layout, argv=None):
                            pre_accepted=bool(command.argument))
         if command.name == "-instances-active":
             return verify_state(layout)
-        if command.name == "start":
+        if command.name in {"start", "chkdsk"}:
             with OperationLock(layout.lock) as guard:
                 config = configuration.load()
                 return Supervisor(configuration, config, registry).run(
-                    command.device, startup_complete=guard.release)
+                    command.device, startup_complete=guard.release,
+                    automatic_chkdsk=command.name == "chkdsk")
         if command.name == "-status":
             return status(registry)
         try:
